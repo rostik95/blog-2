@@ -25,6 +25,7 @@ class Post(models.Model):
     updated = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=2, choices=Status.choices, default=Status.DRAFT)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
+    tags = models.ManyToManyField('Tag', blank=True, related_name='posts')
 
     objects = models.Manager()
     published = PublishmentManager()
@@ -59,3 +60,11 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'Comment by {self.name} on {self.post}.'
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name

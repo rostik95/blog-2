@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from .models import Post, Comment
+from .models import Post, Comment, Tag
 
 
 @admin.register(Comment)
@@ -24,3 +24,7 @@ class PostAdmin(admin.ModelAdmin):
 
     def get_image(self, obj):
         return mark_safe(f'<img src="{obj.image.url}" width="50" height="50">') if obj.image else ''
+
+@admin.register(Tag)
+class AdminTag(admin.ModelAdmin):
+    prepopulated_fields = {'slug': ('name',)}
