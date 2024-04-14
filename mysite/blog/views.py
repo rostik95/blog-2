@@ -1,10 +1,13 @@
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse_lazy, reverse
+
 from .models import Post, Comment
 from django.views.generic import ListView
 
-from .forms import CommentForm
+from .forms import CommentForm, AddPostForm
 from django.views.decorators.http import require_POST
 
 
@@ -55,6 +58,22 @@ def post_detail(request, year, month, day, post):
                                                      'comments': comments,
                                                      'form': form})
 
+
+@login_required
+def add_post(request):
+    if request.method == 'POST':
+        form = AddPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.status = form.cleaned_data['status']
+            post.image = request.FILES.get('image')
+            post.save()
+            post.tags.add(*form.cleaned_data['tags'])
+            return HttpResponseRedirect(reverse('blog:post_list'))
+    else:
+        form = AddPostForm()
+    return render(request, 'blog/post/add.html', {'form': form})
 
 
 # Create your views here.
